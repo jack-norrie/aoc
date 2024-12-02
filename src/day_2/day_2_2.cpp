@@ -4,7 +4,6 @@
 #include <ostream>
 #include <sstream>
 #include <string>
-#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -28,9 +27,9 @@ bool check_safe(int num1, int num2, bool increasing) {
   return (delta_abs > 0 and delta_abs <= 3);
 }
 
-bool check_if_line_stream_is_safe(std::vector<int> numbers, int start, int prev,
-                                  bool increasing, bool skipable,
-                                  std::unordered_map<MemoKey, bool> memo) {
+bool check_state_safety(std::vector<int> numbers, int start, int prev,
+                        bool increasing, bool skipable,
+                        std::unordered_map<MemoKey, bool> memo) {
   if (start == numbers.size()) {
     return true;
   }
@@ -44,15 +43,15 @@ bool check_if_line_stream_is_safe(std::vector<int> numbers, int start, int prev,
   // Option to skip current input (if available).
   bool skip_option = false;
   if (skipable) {
-    skip_option = check_if_line_stream_is_safe(numbers, start + 1, prev,
-                                               increasing, false, memo);
+    skip_option =
+        check_state_safety(numbers, start + 1, prev, increasing, false, memo);
   }
 
   // Option to keep current input (if available).
   bool non_skip_option = false;
   if (prev == -1 || check_safe(numbers[prev], numbers[start], increasing)) {
-    non_skip_option = check_if_line_stream_is_safe(numbers, start + 1, start,
-                                                   increasing, skipable, memo);
+    non_skip_option = check_state_safety(numbers, start + 1, start, increasing,
+                                         skipable, memo);
   }
 
   bool result = skip_option || non_skip_option;
@@ -92,9 +91,9 @@ int main() {
     // upper bound for time complexity O(n).
     std::unordered_map<MemoKey, bool> memo;
     bool increasing_option =
-        check_if_line_stream_is_safe(numbers, 0, -1, true, true, memo);
+        check_state_safety(numbers, 0, -1, true, true, memo);
     bool decreasing_option =
-        check_if_line_stream_is_safe(numbers, 0, -1, false, true, memo);
+        check_state_safety(numbers, 0, -1, false, true, memo);
 
     if (increasing_option || decreasing_option) {
       res += 1;
