@@ -6,7 +6,7 @@
 #include <string>
 #include <tuple>
 
-int find_end_of_next_mul_statement(std::string line, int i) {
+int find_end_of_next_mul(std::string line, int i) {
   while (i < line.length()) {
     // Find starting candidate
     while (i < line.length() && line[i] != 'm') {
@@ -57,7 +57,7 @@ int main() {
 
       std::cout << i << "/" << line.length() << std::endl;
 
-      i = find_end_of_next_mul_statement(line, i);
+      i = find_end_of_next_mul(line, i);
 
       if (i < line.length() && line[i] == '(') {
         i += 1;
