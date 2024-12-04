@@ -5,7 +5,8 @@
 #include <string>
 #include <tuple>
 
-int find_next_target(std::string line, int start, int end, std::string target) {
+int find_next_target(const std::string &line, int start, int end,
+                     std::string target) {
   int i = start;
   while (i < end) {
     // Find starting candidate
@@ -32,19 +33,20 @@ int find_next_target(std::string line, int start, int end, std::string target) {
   return i;
 }
 
-int find_next_do(std::string line, int start) {
+int find_next_do(const std::string &line, int start) {
   return find_next_target(line, start, line.length(), "do()");
 }
 
-int find_next_dont(std::string line, int start) {
+int find_next_dont(const std::string &line, int start) {
   return find_next_target(line, start, line.length(), "don't()");
 }
 
-int find_next_mul(std::string line, int start, int end) {
+int find_next_mul(const std::string &line, int start, int end) {
   return find_next_target(line, start, end, "mul");
 }
 
-std::tuple<int, int> get_next_number(std::string line, int start, int end) {
+std::tuple<int, int> get_next_number(const std::string &line, int start,
+                                     int end) {
   int i = start;
   while (i < end && std::isdigit(line[i])) {
     i += 1;
@@ -55,7 +57,7 @@ std::tuple<int, int> get_next_number(std::string line, int start, int end) {
   return std::tuple(num, i);
 }
 
-int compute_result_in_range(std::string line, int start, int end) {
+int compute_result_in_range(const std::string &line, int start, int end) {
   int res = 0;
   int i = start;
   while (i < end) {
