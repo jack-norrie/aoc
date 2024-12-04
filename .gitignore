@@ -1,3 +1,23 @@
+# Ignore everything by default
 *
-!*.**.pyc
+
+# Allow Git to look into subdirectories
+!*/
+
+# Un-ignore files with extensions that we want to track
+!*.cpp
+!*.h
+!*.py
+!*.txt
+!*.md
+!*.json
+!*.cmake
+!CMakeLists.txt
+!.gitignore
+
+# Ignore specific files/patterns even if they match above
+*.pyc
+*.o
+*.exe
+*.out
 data/**
