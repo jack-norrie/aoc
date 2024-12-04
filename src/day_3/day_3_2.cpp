@@ -125,7 +125,7 @@ int main() {
         i = next_dont + 1;
 
         // Check to see if we actually found the next don't point on this line,
-        // else the search continues on the next line and we stay active.
+        // else the search continues on the next line and we stay enabled.
         if (next_dont < line.length()) {
           enabled = false;
         }
@@ -134,7 +134,7 @@ int main() {
         i = next_do + 1;
 
         // Check to see if we actually find the next do point on this line,
-        // else the search continues on the next line and we stay inactive.
+        // else the search continues on the next line and we stay disabled.
         if (next_do < line.length()) {
           enabled = true;
         }
