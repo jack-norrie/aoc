@@ -69,8 +69,6 @@ int main() {
       // Check starting position.
       if (grid[r][c] == 'A') {
         std::tuple<int, int> pos = std::tuple(r, c);
-
-        // Check each allowed direction.
         if (check_ms_cross(grid, pos)) {
           res += 1;
         }
