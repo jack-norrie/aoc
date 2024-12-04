@@ -41,14 +41,14 @@ bool check_if_line_stream_is_safe(std::vector<int> numbers, int start, int prev,
     return it->second;
   }
 
-  // Option to skip current input (if available)
+  // Option to skip current input (if available).
   bool skip_option = false;
   if (skipable) {
     skip_option = check_if_line_stream_is_safe(numbers, start + 1, prev,
                                                increasing, false, memo);
   }
 
-  // Option to keep current input (if available)
+  // Option to keep current input (if available).
   bool non_skip_option = false;
   if (prev == -1 || check_safe(numbers[prev], numbers[start], increasing)) {
     non_skip_option = check_if_line_stream_is_safe(numbers, start + 1, start,
@@ -66,7 +66,7 @@ int main() {
   // - n: number of numbers in a line.
   int res = 0;
 
-  std::ifstream input_file("data/day_2/test_case_3");
+  std::ifstream input_file("data/day_2/input");
 
   if (!input_file.is_open()) {
     std::cerr << "Error: Could not open file" << std::endl;
@@ -83,13 +83,13 @@ int main() {
     }
 
     // The memoisation is over:
-    // - starting indexes (n)
-    // - previous element index, which can either be i-1 or i-2 (2)
-    // - Wether we are on the increasing path (2)
-    // - Wether we have skips available (2)
+    // - starting indexes (n).
+    // - previous element index, which can either be i-1 or i-2 (2).
+    // - Wether we are on the increasing path (2).
+    // - Wether we have skips available (2).
     // This gives an upper bound for memoisation space complexity O(8n) = O(n),
     // and each memoised result is computed in constant time, this giving a
-    // upper bound for time complexity O(n)
+    // upper bound for time complexity O(n).
     std::unordered_map<MemoKey, bool> memo;
     bool increasing_option =
         check_if_line_stream_is_safe(numbers, 0, -1, true, true, memo);
@@ -98,9 +98,6 @@ int main() {
 
     if (increasing_option || decreasing_option) {
       res += 1;
-    } else {
-
-      std::cout << "Line: " << line << std::endl;
     }
   }
   std::cout << res << std::endl;
