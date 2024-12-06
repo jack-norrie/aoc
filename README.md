@@ -25,3 +25,6 @@ This repository contains my solutions for [Advent of Code 2024](https://adventof
 ### Day 4
 * If you know the size of your array use `std::array`, otherwise use `std::vector`.
 * You can use uniform initialisation {...} for a clear initialisation that is consistent across different types.
+
+## Day 5
+* You can use a combination of `stringstream` and `getline(stream, tmp, <delimiter>)` to iterate through some delimited data. When no delimiter is passed the default behaviour is deliminate by lines.
