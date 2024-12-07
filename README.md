@@ -34,3 +34,5 @@ This repository contains my solutions for [Advent of Code 2024](https://adventof
 
 * You can use a combination of `stringstream` and `getline(stream, tmp, <delimiter>)` to iterate through some delimited data. When no delimiter is passed the default behaviour is deliminate by lines.
 * You can use the pattern `for (item : iterator)` to iterate over the items in an iterator.
+* The interface for getting elements from an unordered map changes depending if the unordered map is constant or not. If constant you cannot use `[key]` since this by default will populate the map with a default value if teh `key` is not present.
+* Some useful `map` methods like `contains()` are not available below `c++20`, make sure to add `-std=c++23` to your compile command.
