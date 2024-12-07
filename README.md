@@ -36,3 +36,7 @@ This repository contains my solutions for [Advent of Code 2024](https://adventof
 * You can use the pattern `for (item : iterator)` to iterate over the items in an iterator.
 * The interface for getting elements from an unordered map changes depending if the unordered map is constant or not. If constant you cannot use `[key]` since this by default will populate the map with a default value if teh `key` is not present.
 * Some useful `map` methods like `contains()` are not available below `c++20`, make sure to add `-std=c++23` to your compile command.
+
+
+### Day 6
+* A trick to make int tuple hashes is to xor the tuple elements. Although you should bit shift each index, else hash(x, y) == hash(y, x), i.e. the hash will be permutation invariant.
