@@ -74,7 +74,7 @@ std::vector<size_t> get_topological_sort(std::string line) {
 }
 
 int main() {
-  std::fstream input_file("data/day_5/input");
+  std::fstream input_file("year_2024/data/day_5/input");
   if (!input_file.is_open()) {
     std::cout << "Erorr: Could not open file." << std::endl;
     return 1;

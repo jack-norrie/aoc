@@ -108,7 +108,7 @@ int compute_result_in_range(const std::string &line, int start, int end) {
 int main() {
   int res = 0;
 
-  std::ifstream input_file("data/day_3/input");
+  std::ifstream input_file("year_2024/data/day_3/input");
 
   if (!input_file.is_open()) {
     std::cout << "Error: Could not open file" << std::endl;
