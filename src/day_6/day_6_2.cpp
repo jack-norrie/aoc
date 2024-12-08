@@ -83,16 +83,11 @@ std::unordered_map<char, char> state_transitions = {
 std::unordered_map<char, int> state_to_num = {
     {'^', 0}, {'>', 1}, {'v', 2}, {'<', 3}};
 
-bool check_obstruction_causes_cycle(const std::vector<std::vector<char>> &grid,
-                                    int r, int c, char state) {
+bool check_obstruction_causes_cycle(std::vector<std::vector<char>> grid, int r,
+                                    int c, char state) {
 
   // For the sake of cycle detection direction is also important.
   std::unordered_set<std::tuple<int, int, int>> seen_states;
-  // Add initial state to seen_states, i.e. before obstruction simulation.
-  seen_states.insert(std::tuple(r, c, state_to_num[state]));
-
-  // Change state to simulate an obstruction.
-  state = state_transitions[state];
 
   while (check_in_bounds(grid, r, c)) {
     if (seen_states.contains(std::tuple(r, c, state_to_num[state]))) {
@@ -108,7 +103,7 @@ bool check_obstruction_causes_cycle(const std::vector<std::vector<char>> &grid,
     int n_c = c + d_c;
 
     if (!check_in_bounds(grid, n_r, n_c)) {
-      return false;
+      break;
     }
 
     if (grid[n_r][n_c] != '#') {
@@ -120,9 +115,8 @@ bool check_obstruction_causes_cycle(const std::vector<std::vector<char>> &grid,
   }
   return false;
 }
-size_t
-count_cycle_causing_obstructions(const std::vector<std::vector<char>> &grid,
-                                 int r, int c, char state) {
+size_t count_cycle_causing_obstructions(std::vector<std::vector<char>> grid,
+                                        int r, int c, char state) {
   size_t res = 0;
 
   std::unordered_set<std::tuple<int, int>> seen_states;
@@ -144,11 +138,17 @@ count_cycle_causing_obstructions(const std::vector<std::vector<char>> &grid,
     // If next is not an obstruction, see if it being an obstruction
     // would cause a cycle.
     if (grid[n_r][n_c] != '#') {
+      // Simulate obstruction at next.
+      grid[n_r][n_c] = '#';
+
       if (!(seen_states.contains(std::tuple(n_r, n_c))) &&
           check_obstruction_causes_cycle(grid, r, c, state)) {
         std::cout << "Cycle Detected: " << n_r << "-" << n_c << std::endl;
         res += 1;
       }
+
+      // Remove simulated obstruction.
+      grid[n_r][n_c] = '.';
 
       r = n_r;
       c = n_c;
