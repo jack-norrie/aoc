@@ -11,13 +11,13 @@
 namespace std {
 template <> struct hash<tuple<int, int>> {
   size_t operator()(const tuple<int, int> &t) const {
-    return hash<int>()(get<0>(t)) ^ (hash<int>()(get<1>(t)) << 1);
+    return hash<int>()(get<0>(t)) ^ (hash<int>()(get<1>(t)) << 16);
   }
 };
 template <> struct hash<tuple<int, int, int>> {
   size_t operator()(const tuple<int, int, int> &t) const {
-    return hash<int>()(get<0>(t)) ^ (hash<int>()(get<1>(t)) << 1) ^
-           (hash<int>()(get<2>(t)) << 1);
+    return hash<int>()(get<0>(t)) ^ (hash<int>()(get<1>(t)) << 8) ^
+           (hash<int>()(get<2>(t)) << 16);
   }
 };
 } // namespace std
@@ -86,13 +86,20 @@ std::unordered_map<char, int> state_to_num = {
 bool check_obstruction_causes_cycle(const std::vector<std::vector<char>> &grid,
                                     int r, int c, char state) {
 
+  // For the sake of cycle detection direction is also important.
   std::unordered_set<std::tuple<int, int, int>> seen_states;
+  // Add initial state to seen_states, i.e. before obstruction simulation.
   seen_states.insert(std::tuple(r, c, state_to_num[state]));
 
   // Change state to simulate an obstruction.
   state = state_transitions[state];
 
   while (check_in_bounds(grid, r, c)) {
+    if (seen_states.contains(std::tuple(r, c, state_to_num[state]))) {
+      return true;
+    }
+    seen_states.insert(std::tuple(r, c, state_to_num[state]));
+
     std::tuple<int, int> direction = state_to_direction[state];
     int d_r = std::get<0>(direction);
     int d_c = std::get<1>(direction);
@@ -100,12 +107,11 @@ bool check_obstruction_causes_cycle(const std::vector<std::vector<char>> &grid,
     int n_r = r + d_r;
     int n_c = c + d_c;
 
-    // If not in bounds then update and allow while loop to end.
-    if (!check_in_bounds(grid, n_r, n_c) || grid[n_r][n_c] != '#') {
-      if (seen_states.contains(std::tuple(r, c, state_to_num[state]))) {
-        return true;
-      }
+    if (!check_in_bounds(grid, n_r, n_c)) {
+      return false;
+    }
 
+    if (grid[n_r][n_c] != '#') {
       r = n_r;
       c = n_c;
     } else {
@@ -131,10 +137,16 @@ count_cycle_causing_obstructions(const std::vector<std::vector<char>> &grid,
     int n_r = r + d_r;
     int n_c = c + d_c;
 
-    // If not in bounds then update and allow while loop to end.
-    if (!check_in_bounds(grid, n_r, n_c) || grid[n_r][n_c] != '#') {
+    if (!check_in_bounds(grid, n_r, n_c)) {
+      break;
+    }
+
+    // If next is not an obstruction, see if it being an obstruction
+    // would cause a cycle.
+    if (grid[n_r][n_c] != '#') {
       if (!(seen_states.contains(std::tuple(n_r, n_c))) &&
           check_obstruction_causes_cycle(grid, r, c, state)) {
+        std::cout << "Cycle Detected: " << n_r << "-" << n_c << std::endl;
         res += 1;
       }
 
