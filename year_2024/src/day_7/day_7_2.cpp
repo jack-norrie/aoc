@@ -27,6 +27,19 @@ std::stack<long long> get_operand_stack(std::string &operands) {
   return operand_stack;
 }
 
+long long concat_op(long long x, long long y) {
+  // Shift x by the order of magnitude associatd with y.
+  // This avoids expensive string conversion.
+  long long tmp = y;
+  long long y_mag = 1;
+  while (tmp > 0) {
+    tmp /= 10;
+    y_mag *= 10;
+  }
+
+  return x * y_mag + y;
+}
+
 bool check_if_operands_can_make_target(std::stack<long long> &operand_stack,
                                        const long long &target) {
   if (operand_stack.size() == 1) {
@@ -49,9 +62,7 @@ bool check_if_operands_can_make_target(std::stack<long long> &operand_stack,
   operand_stack.pop();
 
   // Concatenation option
-  long long concat_result =
-      std::stoll(std::to_string(operand_1) + std::to_string(operand_2));
-  operand_stack.push(concat_result);
+  operand_stack.push(concat_op(operand_1, operand_2));
   bool concat_option = check_if_operands_can_make_target(operand_stack, target);
   operand_stack.pop();
 
