@@ -40,8 +40,8 @@ bool in_bounds(const std::vector<std::vector<char>> &grid, int r, int c) {
 std::vector<std::tuple<int, int>> directions = {
     {1, 0}, {0, 1}, {-1, 0}, {0, -1}};
 
-size_t get_perimiter_contribution(const std::vector<std::vector<char>> &grid,
-                                  int r, int c) {
+size_t get_sides_contribution(const std::vector<std::vector<char>> &grid, int r,
+                              int c) {
   size_t res = 0;
 
   for (std::tuple<int, int> direction : directions) {
@@ -59,13 +59,13 @@ size_t get_perimiter_contribution(const std::vector<std::vector<char>> &grid,
   return res;
 }
 
-void get_area_and_perimiter_dfs(const std::vector<std::vector<char>> &grid,
-                                std::unordered_set<std::tuple<int, int>> &seen,
-                                int r, int c, size_t &area, size_t &perimiter) {
+void get_area_and_sides_dfs(const std::vector<std::vector<char>> &grid,
+                            std::unordered_set<std::tuple<int, int>> &seen,
+                            int r, int c, size_t &area, size_t &perimiter) {
   seen.insert(std::tuple(r, c));
 
   ++area;
-  perimiter += get_perimiter_contribution(grid, r, c);
+  perimiter += get_sides_contribution(grid, r, c);
 
   for (std::tuple<int, int> direction : directions) {
     int d_r = std::get<0>(direction);
@@ -76,7 +76,7 @@ void get_area_and_perimiter_dfs(const std::vector<std::vector<char>> &grid,
 
     if (in_bounds(grid, n_r, n_c) && !seen.contains(std::tuple(n_r, n_c)) &&
         grid[n_r][n_c] == grid[r][c]) {
-      get_area_and_perimiter_dfs(grid, seen, n_r, n_c, area, perimiter);
+      get_area_and_sides_dfs(grid, seen, n_r, n_c, area, perimiter);
     }
   }
 }
@@ -95,7 +95,7 @@ int get_cost(const std::vector<std::vector<char>> &grid) {
         size_t area = 0;
         size_t perimiter = 0;
 
-        get_area_and_perimiter_dfs(grid, seen, r, c, area, perimiter);
+        get_area_and_sides_dfs(grid, seen, r, c, area, perimiter);
 
         res += area * perimiter;
       }
