@@ -1,6 +1,0 @@
--std=c++23
--Wall
--I/usr/include/c++/11
--I/usr/include
--I/usr/local/include
-
