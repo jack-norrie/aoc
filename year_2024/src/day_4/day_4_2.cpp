@@ -49,7 +49,7 @@ int main() {
   int res = 0;
 
   // Get file into 2d dynamic array.
-  std::ifstream input_file("year_2024/data/day_4/input");
+  std::ifstream input_file("data/day_4/input");
   std::vector<std::vector<char>> grid;
   std::string line;
   while (std::getline(input_file, line)) {

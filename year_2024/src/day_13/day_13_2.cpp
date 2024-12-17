@@ -41,7 +41,7 @@ bool int_close(const double &num) {
 int main() {
   long res = 0;
 
-  std::ifstream input_file("year_2024/data/day_13/input");
+  std::ifstream input_file("data/day_13/input");
   if (!input_file.is_open()) {
     throw std::runtime_error("Could not open hand.");
   }

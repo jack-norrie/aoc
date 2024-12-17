@@ -7,7 +7,7 @@
 int main() {
   int res = 0;
 
-  std::ifstream input_file("year_2024/data/day_2/input");
+  std::ifstream input_file("data/day_2/input");
 
   if (!input_file.is_open()) {
     std::cerr << "Error: Could not open file" << std::endl;

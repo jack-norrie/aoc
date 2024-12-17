@@ -5,7 +5,7 @@
 #include <vector>
 
 int main() {
-  std::ifstream input_file("year_2024/data/day_1/input");
+  std::ifstream input_file("data/day_1/input");
 
   if (!input_file.is_open()) {
     std::cerr << "Error: Could not open file" << std::endl;

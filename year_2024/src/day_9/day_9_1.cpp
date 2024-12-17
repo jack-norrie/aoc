@@ -72,7 +72,7 @@ long long get_check_sum(const std::vector<long long> &compact_disk_map) {
 }
 
 int main() {
-  std::ifstream input_file("year_2024/data/day_9/input");
+  std::ifstream input_file("data/day_9/input");
   if (!input_file.is_open()) {
     throw std::runtime_error("Error: Could not open file.");
   }

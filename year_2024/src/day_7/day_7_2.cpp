@@ -76,7 +76,7 @@ bool check_if_operands_can_make_target(std::stack<long long> &operand_stack,
 int main() {
   long long res = 0;
 
-  std::ifstream input_file("year_2024/data/day_7/input");
+  std::ifstream input_file("data/day_7/input");
   if (!input_file.is_open()) {
     throw std::runtime_error("Error: Could not open file.");
   }

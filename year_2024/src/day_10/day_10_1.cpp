@@ -56,7 +56,7 @@ size_t get_trail_head_score(const std::vector<std::vector<size_t>> &grid,
 int main() {
   int res = 0;
 
-  std::ifstream input_file("year_2024/data/day_10/input");
+  std::ifstream input_file("data/day_10/input");
   if (!input_file.is_open()) {
     throw std::runtime_error("Error: Could not open file.");
     return 1;

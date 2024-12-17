@@ -30,7 +30,7 @@ long long simulate_stone(std::string stone, size_t num_iterations) {
 int main() {
   long long res = 0;
 
-  std::ifstream input_file("year_2024/data/day_11/input");
+  std::ifstream input_file("data/day_11/input");
   if (!input_file.is_open()) {
     throw std::runtime_error("Error: Could not open file.");
   }

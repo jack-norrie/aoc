@@ -40,7 +40,7 @@ std::tuple<int, size_t> get_next_number(std::string line, size_t i) {
 int main() {
   int res = 0;
 
-  std::ifstream input_file("year_2024/data/day_3/input");
+  std::ifstream input_file("data/day_3/input");
 
   if (!input_file.is_open()) {
     std::cout << "Error: Could not open file" << std::endl;

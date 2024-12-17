@@ -20,7 +20,7 @@ template <> struct hash<tuple<int, int, int, int>> {
 } // namespace std
 
 std::vector<std::vector<char>> get_grid() {
-  std::ifstream input_file("year_2024/data/day_12/input");
+  std::ifstream input_file("data/day_12/input");
   if (!input_file.is_open()) {
     throw std::runtime_error("Error: Could not open file");
   }

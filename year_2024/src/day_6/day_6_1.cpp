@@ -48,7 +48,7 @@ get_starting_position(const std::vector<std::vector<char>> &grid) {
 }
 
 std::vector<std::vector<char>> get_grid() {
-  std::ifstream input_file("year_2024/data/day_6/input");
+  std::ifstream input_file("data/day_6/input");
   if (!input_file.is_open()) {
     std::cout << "Error: Could not open file";
   }

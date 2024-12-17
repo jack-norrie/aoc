@@ -9,7 +9,7 @@
 
 std::tuple<std::vector<std::array<int, 2>>, std::vector<std::array<int, 2>>>
 get_positions_and_velocicities() {
-  std::ifstream input_file("year_2024/data/day_14/test_case_1");
+  std::ifstream input_file("data/day_14/test_case_1");
   if (!input_file.is_open()) {
     throw std::runtime_error("Could not open file.");
   }

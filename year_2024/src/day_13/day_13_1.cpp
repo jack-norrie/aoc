@@ -31,7 +31,7 @@ std::tuple<size_t, size_t> get_coordinates(std::ifstream &input_file,
 int main() {
   size_t res = 0;
 
-  std::ifstream input_file("year_2024/data/day_13/input");
+  std::ifstream input_file("data/day_13/input");
   if (!input_file.is_open()) {
     throw std::runtime_error("Could not open hand.");
   }
