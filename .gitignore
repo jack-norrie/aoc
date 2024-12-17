@@ -21,3 +21,4 @@
 *.exe
 *.out
 data/**
+**/compile_flags.txt
