@@ -9,7 +9,7 @@
 
 std::tuple<std::vector<std::array<int, 2>>, std::vector<std::array<int, 2>>>
 get_positions_and_velocicities() {
-  std::ifstream input_file("data/day_14/test_case_1");
+  std::ifstream input_file("data/day_14/input");
   if (!input_file.is_open()) {
     throw std::runtime_error("Could not open file.");
   }
@@ -55,8 +55,8 @@ int main() {
   std::array<size_t, 4> quadrants = {{0, 0, 0, 0}};
 
   size_t n = positions.size();
-  size_t n_cols = 11;
-  size_t n_rows = 7;
+  size_t n_cols = 101;
+  size_t n_rows = 103;
   for (size_t i = 0; i < n; i++) {
     int pos_x = positions[i][0];
     int pos_y = positions[i][1];
@@ -64,7 +64,6 @@ int main() {
     int vel_x = velocities[i][0];
     int vel_y = velocities[i][1];
 
-    std::cout << "Here" << std::endl;
     pos_x += vel_x * 100;
     pos_y += vel_y * 100;
 
@@ -73,25 +72,31 @@ int main() {
 
     size_t quadrant = 0;
 
-    bool xq1 = pos_x <= n_cols / 2 - 1;
-    bool xq2 = pos_x >= (n_cols + 2 - 1) / 2;
-    if (xq1 ^ xq2) {
+    bool xq1 = pos_x < n_cols / 2;
+    bool xq2 = pos_x > n_cols / 2;
+    if (!(xq1 ^ xq2)) {
       continue;
-    } else if (xq1) {
+    } else if (xq2) {
       quadrant += 1;
     }
 
-    bool yq1 = pos_y <= n_rows / 2 - 1;
-    bool yq2 = pos_y >= (n_rows + 2 - 1) / 2;
-    if (yq1 && yq2) {
+    bool yq1 = pos_y < n_rows / 2;
+    bool yq2 = pos_y > n_rows / 2;
+    if (!(yq1 ^ yq2)) {
       continue;
-    } else if (yq1) {
+    } else if (yq2) {
       quadrant += 2;
     }
 
     quadrants[quadrant] += 1;
-
-    std::cout << pos_x << std::endl;
-    std::cout << pos_y << std::endl;
   }
+
+  size_t sf = 1;
+  for (auto q_count : quadrants) {
+    sf *= q_count;
+  }
+
+  std::cout << sf << std::endl;
+
+  return 0;
 }
