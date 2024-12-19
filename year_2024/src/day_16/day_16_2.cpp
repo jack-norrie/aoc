@@ -2,6 +2,9 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <limits>
+#include <memory>
+#include <optional>
 #include <queue>
 #include <stdexcept>
 #include <string>
@@ -14,9 +17,24 @@ using Grid = std::vector<Row>;
 
 using Coord = std::array<int, 2>;
 using State = std::tuple<Coord, Coord>;
-using HeapElement = std::tuple<int, State>;
+
+struct HeapElement {
+  size_t weight;
+  State state;
+  std::optional<std::shared_ptr<HeapElement>> previous;
+
+  bool operator>(const HeapElement &other) const {
+    return weight > other.weight;
+  }
+};
 
 namespace std {
+template <> struct hash<Coord> {
+  size_t operator()(const Coord &coord) const {
+    return coord[0] ^ coord[1] << 16;
+  }
+};
+
 template <> struct hash<State> {
   size_t operator()(const State &s) const {
     Coord p = get<0>(s);
@@ -68,25 +86,33 @@ Coord add_coords(const Coord &x, const Coord &y) {
   return Coord{c1, c2};
 }
 
-std::vector<HeapElement> get_transitions(const State &state) {
+std::vector<HeapElement> get_transitions(const HeapElement &heap_element,
+                                         const size_t &weight) {
   std::vector<HeapElement> transitions = {};
 
+  State state = heap_element.state;
   Coord cur_position = std::get<0>(state);
   Coord cur_direction = std::get<1>(state);
 
+  auto shared_previous = std::make_shared<HeapElement>(heap_element);
+
   // Move forward
   Coord forward_position = add_coords(cur_position, cur_direction);
-  transitions.push_back(std::tuple(1, State{forward_position, cur_direction}));
+  transitions.push_back(HeapElement{
+      weight + 1, State{forward_position, cur_direction}, shared_previous});
 
   // Rotate 90 degrees
   Coord direction_90_1 = Coord{cur_direction[1], cur_direction[0]};
-  transitions.push_back(std::tuple(1000, State{cur_position, direction_90_1}));
+  transitions.push_back(HeapElement{
+      weight + 1000, State{cur_position, direction_90_1}, shared_previous});
   Coord direction_90_2 = Coord{-cur_direction[1], -cur_direction[0]};
-  transitions.push_back(std::tuple(1000, State{cur_position, direction_90_2}));
+  transitions.push_back(HeapElement{
+      weight + 1000, State{cur_position, direction_90_2}, shared_previous});
 
   // Rotate 180 degrees
   Coord direction_180 = Coord{-cur_direction[0], -cur_direction[1]};
-  transitions.push_back(std::tuple(2000, State{cur_position, direction_180}));
+  transitions.push_back(HeapElement{
+      weight + 2000, State{cur_position, direction_180}, shared_previous});
 
   return transitions;
 }
@@ -97,6 +123,18 @@ bool check_state_valid(const Grid &grid, const State &state) {
                    pos[1] < grid[0].size();
   bool non_wall = grid[pos[0]][pos[1]] != '#';
   return in_bounds && non_wall;
+}
+
+void add_path_to_possible_seats(std::unordered_set<Coord> &possible_seats,
+                                HeapElement heap_element) {
+  Coord state = std::get<0>(heap_element.state);
+  possible_seats.insert(state);
+
+  while (heap_element.previous.has_value()) {
+    heap_element = *heap_element.previous.value();
+    Coord state = std::get<0>(heap_element.state);
+    possible_seats.insert(state);
+  }
 }
 
 size_t get_score(const Grid &grid) {
@@ -111,27 +149,36 @@ size_t get_score(const Grid &grid) {
   State start_state = State{start_pos, Coord{0, 1}};
   heap.push(HeapElement{0, start_state});
 
+  size_t max_allowed_weight = std::numeric_limits<size_t>::max();
+  std::unordered_set<Coord> possible_seats = {};
+
   while (heap.size() > 0) {
-    HeapElement cur_weighted_state = heap.top();
+    HeapElement heap_element = heap.top();
     heap.pop();
 
-    size_t weight = std::get<0>(cur_weighted_state);
-    State state = std::get<1>(cur_weighted_state);
+    size_t weight = heap_element.weight;
+    State state = heap_element.state;
     Coord pos = std::get<0>(state);
+
+    if (weight > max_allowed_weight) {
+      break;
+    }
     if (grid[pos[0]][pos[1]] == 'E') {
-      return weight;
+      add_path_to_possible_seats(possible_seats, heap_element);
+      max_allowed_weight = weight;
+      continue;
     }
     seen.insert(state);
 
-    for (const HeapElement &state_transition : get_transitions(state)) {
-      size_t next_weight = weight + std::get<0>(state_transition);
-      State next_state = std::get<1>(state_transition);
+    for (const HeapElement &heap_element_transition :
+         get_transitions(heap_element, weight)) {
+      State next_state = heap_element_transition.state;
       if (check_state_valid(grid, next_state) && !seen.contains(next_state)) {
-        heap.push(HeapElement{next_weight, next_state});
+        heap.push(heap_element_transition);
       }
     }
   }
-  throw std::runtime_error("Could not find end.");
+  return possible_seats.size();
 }
 
 int main() {
