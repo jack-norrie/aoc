@@ -187,7 +187,7 @@ int main() {
   //    A = d(A)
   //
   // The above simplification is important since it means that each loop can
-  // be processed indepdently of the state associated with previously loops,
+  // be processed indepdently of the state associated with previous loops,
   // this will be important when we motivate a "backwards" passing algorithm
   // later.
   //
@@ -214,22 +214,21 @@ int main() {
   // * f(A_t) % 8 = v_t
   //
   // Trying to solve this problem in the forward direction will lead to
-  // problems, since our values only let us solve for the least significant 3
-  // bits. This prevents us evaluating f(A_t), since the majority of the bits
-  // are unknown, i.e. we still have the same combinatorial complexity in
-  // searching through the A register space.
+  // problems, because the function evaulations depend on A in its entireity,
+  // and as has been previously established the space of possible A values is
+  // very large and unknown.
   //
   // To overcome this issue of not knowing the starting bits, it would be smart
-  // to maybe start from a position where we do know the a register value.
+  // to start from a position where we do know the A register value.
   // Fortunately, we know that the loop terminates, i.e. the program ends with a
   // A register value of 0. If we move to the point right before the final
-  // decrement operation we are left with a register with only 3 bits. This
-  // means we are free to solve the least significant 3 bit constraint without
-  // having to know the previous bit values (there aren't any).
+  // decrement operation we are left with a register with at most 3 bits.
+  // Furthermore, these 3 bits can be solved for using the 3 bit constraint
+  // equation for this loop iteration.
   //
-  // Furthermore, we are now free to use the next constraint in reverse order
-  // since we now know the previous bits for this register state via the
-  // previous solution.
+  // Assitionally, we are now free to use the next constraint (in reverse order)
+  // since we have now fixed the prior bits with our previous constraint
+  // solution.
   //
   // We can continue like this until we have a a register value satisfying all
   // the constraints.
