@@ -3,9 +3,9 @@
 #include <iostream>
 #include <queue>
 #include <sstream>
-#include <stack>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 const std::string INPUT_FILE = "data/day_18/input";
 const std::size_t N_ROWS = 71;
@@ -16,13 +16,13 @@ using Grid = std::array<std::array<char, N_COLS>, N_ROWS>;
 
 const std::vector<Coord> DIRECTIONS = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
 
-std::stack<Coord> load_corrupted_addresses() {
+std::vector<Coord> load_corrupted_addresses() {
   std::ifstream input_file(INPUT_FILE);
   if (!input_file.is_open()) {
     throw std::runtime_error("Could not open input file.");
   }
 
-  std::stack<Coord> locations = {};
+  std::vector<Coord> locations = {};
 
   std::string line = {};
   while (std::getline(input_file, line)) {
@@ -34,16 +34,10 @@ std::stack<Coord> load_corrupted_addresses() {
       std::size_t coord = std::stoi(num_string);
       location[1 - i] = coord;
     }
-    locations.push(location);
+    locations.push_back(location);
   }
 
-  std::stack<Coord> locations_reversed = {};
-  while (locations.size() > 0) {
-    locations_reversed.push(locations.top());
-    locations.pop();
-  }
-
-  return locations_reversed;
+  return locations;
 }
 
 Grid generate_grid() {
@@ -56,10 +50,12 @@ Grid generate_grid() {
   return grid;
 }
 
-void simulate_falling(Grid &grid, std::stack<Coord> &corrupted_addresses) {
-  Coord location = corrupted_addresses.top();
-  corrupted_addresses.pop();
-  grid[location[0]][location[1]] = '#';
+void simulate_falling(Grid &grid, std::vector<Coord> &corrupted_addresses,
+                      const int &n_fall) {
+  for (size_t i = 0; i < n_fall; i++) {
+    Coord location = corrupted_addresses[i];
+    grid[location[0]][location[1]] = '#';
+  }
 }
 
 void print_grid(const Grid &grid) {
@@ -92,7 +88,7 @@ std::vector<Coord> get_neighbours(const Grid &grid, const Coord &pos) {
   return neighbours;
 }
 
-size_t find_shortest_path_length(Grid grid) {
+bool path_exists(Grid grid) {
   Coord pos = {0, 0};
   Coord end_pos = {N_ROWS - 1, N_COLS - 1};
   std::queue<Coord> q{{pos}};
@@ -105,7 +101,7 @@ size_t find_shortest_path_length(Grid grid) {
       q.pop();
 
       if (pos == end_pos) {
-        return path_length;
+        return true;
       }
 
       // Make this location in accessible so that it is not re-traversed
@@ -120,28 +116,32 @@ size_t find_shortest_path_length(Grid grid) {
     }
     ++path_length;
   }
-  throw std::runtime_error("No path to end found.");
+  return false;
 }
 
 int main() {
-  std::stack<Coord> corrupted_addresses = load_corrupted_addresses();
+  std::vector<Coord> corrupted_addresses = load_corrupted_addresses();
 
-  Grid grid = generate_grid();
+  size_t l = 0;
+  size_t r = corrupted_addresses.size() - 1;
+  size_t m = {};
+  while (l < r) {
+    // A fresh gird needs to be generated since, rather than using a seen set,
+    // the path finding algorithm marks seen locations as "walls".
+    Grid grid = generate_grid();
 
-  Coord top_address = corrupted_addresses.top();
-  while (true) {
-    simulate_falling(grid, corrupted_addresses);
+    m = l + (r - l) / 2;
+    simulate_falling(grid, corrupted_addresses, m);
 
-    try {
-      find_shortest_path_length(grid);
-    } catch (std::runtime_error) {
-      break;
+    if (path_exists(grid)) {
+      l = m + 1;
+    } else {
+      r = m;
     }
-
-    top_address = corrupted_addresses.top();
   }
 
-  std::cout << top_address[1] << ',' << top_address[0] << std::endl;
+  std::cout << corrupted_addresses[m][1] << ',' << corrupted_addresses[m][0]
+            << std::endl;
 
   return 0;
 }
