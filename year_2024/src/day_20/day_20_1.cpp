@@ -119,7 +119,7 @@ int main() {
     }
   }
 
-  for (size_t i = 0; i <= path_length_no_cheat; i++) {
+  for (size_t i = 1; i <= path_length_no_cheat; i++) {
     if (saved_path_length_counts[i] > 0) {
       std::cout << "There are " << saved_path_length_counts[i]
                 << " cheats that save " << i << " picoseconds." << std::endl;
