@@ -11,7 +11,7 @@
 using Grid = std::vector<std::vector<char>>;
 using Pos = std::array<int, 2>;
 
-const size_t CHEAT_LENGTH = 20;
+const int CHEAT_LENGTH = 20;
 
 namespace std {
 template <> struct hash<Pos> {
@@ -151,14 +151,23 @@ int main() {
     saved_path_length_counts.push_back(0);
   }
 
+  // Iterate over each non wall position.
   for (int r = 0; r < grid.size(); r++) {
     for (int c = 0; c < grid[0].size(); c++) {
       if (grid[r][c] != '#') {
-        for (int n_r = 0; n_r < grid.size(); n_r++) {
-          for (int n_c = 0; n_c < grid[0].size(); n_c++) {
+
+        // Iterate over all jump positions within the CHEAT_LENGTH L1 radius.
+        int min_row = std::max(0, r - CHEAT_LENGTH);
+        int max_row =
+            std::min(static_cast<int>(grid.size()) - 1, r + CHEAT_LENGTH);
+        for (int n_r = min_row; n_r <= max_row; n_r++) {
+          int remaining_length = CHEAT_LENGTH - std::abs(r - n_r);
+          int min_col = std::max(0, c - remaining_length);
+          int max_col = std::min(static_cast<int>(grid[0].size()) - 1,
+                                 c + remaining_length);
+          for (int n_c = min_col; n_c <= max_col; n_c++) {
             size_t jump_distance = std::abs(r - n_r) + std::abs(c - n_c);
-            if ((grid[n_r][n_c] != '#') &&
-                (jump_distance > 0 && jump_distance <= CHEAT_LENGTH)) {
+            if (grid[n_r][n_c] != '#') {
               int saved_path_length = distances_from_start.at(Pos{n_r, n_c}) -
                                       distances_from_start.at(Pos{r, c}) -
                                       jump_distance;
