@@ -7,13 +7,13 @@
 #include <unordered_map>
 #include <vector>
 
-using Pos = std::array<int, 2>;
-
 const size_t DEPTH = 26;
 
-const std::array<std::array<char, 3>, 4> NUMPAD = {
+using Pos = std::array<int, 2>;
+
+const std::array<std::array<char, 3>, 4> NUM_PAD = {
     {{'7', '8', '9'}, {'4', '5', '6'}, {'1', '2', '3'}, {' ', '0', 'A'}}};
-const std::array<std::array<char, 3>, 2> KEYPAD = {
+const std::array<std::array<char, 3>, 2> ARROW_PAD = {
     {{' ', '^', 'A'}, {'<', 'v', '>'}}};
 
 template <size_t Rows, size_t Cols>
@@ -28,10 +28,10 @@ get_symbol_to_pos_map(const std::array<std::array<char, Cols>, Rows> &grid) {
   return pos_map;
 }
 
-const std::unordered_map<char, Pos> NUMPAD_POS_MAP =
-    get_symbol_to_pos_map(NUMPAD);
-const std::unordered_map<char, Pos> KEYPAD_POS_MAP =
-    get_symbol_to_pos_map(KEYPAD);
+const std::unordered_map<char, Pos> NUM_PAD_POS_MAP =
+    get_symbol_to_pos_map(NUM_PAD);
+const std::unordered_map<char, Pos> ARROW_PAD_POS_MAP =
+    get_symbol_to_pos_map(ARROW_PAD);
 
 std::vector<std::string> get_codes() {
   std::ifstream input_file("data/day_21/input");
@@ -62,14 +62,14 @@ size_t move_horizontally(Pos &pos, const int &d_c, const size_t &depth,
                          std::unordered_map<MemoKey, size_t> &memo) {
   size_t length = 0;
   if (d_c < 0) {
-    Pos next_pos = KEYPAD_POS_MAP.at('<');
+    Pos next_pos = ARROW_PAD_POS_MAP.at('<');
     length += request_movement_and_press(pos[0], pos[1], next_pos[0] - pos[0],
                                          next_pos[1] - pos[1], depth - 1, memo);
     pos = next_pos;
     length += (-d_c - 1) *
               request_movement_and_press(pos[0], pos[1], 0, 0, depth - 1, memo);
   } else if (d_c > 0) {
-    Pos next_pos = KEYPAD_POS_MAP.at('>');
+    Pos next_pos = ARROW_PAD_POS_MAP.at('>');
     length += request_movement_and_press(pos[0], pos[1], next_pos[0] - pos[0],
                                          next_pos[1] - pos[1], depth - 1, memo);
     pos = next_pos;
@@ -83,14 +83,14 @@ size_t move_vertically(Pos &pos, const int &d_r, const size_t &depth,
                        std::unordered_map<MemoKey, size_t> &memo) {
   size_t length = 0;
   if (d_r > 0) {
-    Pos next_pos = KEYPAD_POS_MAP.at('v');
+    Pos next_pos = ARROW_PAD_POS_MAP.at('v');
     length += request_movement_and_press(pos[0], pos[1], next_pos[0] - pos[0],
                                          next_pos[1] - pos[1], depth - 1, memo);
     pos = next_pos;
     length += (d_r - 1) *
               request_movement_and_press(pos[0], pos[1], 0, 0, depth - 1, memo);
   } else if (d_r < 0) {
-    Pos next_pos = KEYPAD_POS_MAP.at('^');
+    Pos next_pos = ARROW_PAD_POS_MAP.at('^');
     length += request_movement_and_press(pos[0], pos[1], next_pos[0] - pos[0],
                                          next_pos[1] - pos[1], depth - 1, memo);
     pos = next_pos;
@@ -103,7 +103,7 @@ size_t move_vertically(Pos &pos, const int &d_r, const size_t &depth,
 size_t press_button(Pos &pos, const size_t &depth,
                     std::unordered_map<MemoKey, size_t> &memo) {
   size_t length = 0;
-  Pos next_pos = KEYPAD_POS_MAP.at('A');
+  Pos next_pos = ARROW_PAD_POS_MAP.at('A');
   length += request_movement_and_press(pos[0], pos[1], next_pos[0] - pos[0],
                                        next_pos[1] - pos[1], depth - 1, memo);
   pos = next_pos;
@@ -119,25 +119,29 @@ size_t request_movement_and_press(const int &r, const int &c, const int &d_r,
     return memo.at(memo_key);
   }
 
+  // If we are at depth zero we are at the human level and can press the
+  // requested button with a single action.
   if (depth == 0) {
     return 1;
   }
 
+  // Depending on wether we are at top level or not will determine where the
+  // panic positoin is, i.e. the position that we cannot go.
   Pos panic_pos = {};
   if (depth == DEPTH) {
-    panic_pos = NUMPAD_POS_MAP.at(' ');
+    panic_pos = NUM_PAD_POS_MAP.at(' ');
   } else {
-    panic_pos = KEYPAD_POS_MAP.at(' ');
+    panic_pos = ARROW_PAD_POS_MAP.at(' ');
   }
 
-  // At the lower level we want to chain same direction movements together, to
-  // make this as effiicent as possible, we should try to move the largest
-  // distance first, i.e. the following prioritisation: <, v, ^ = >.
-
-  // Look into moving horizontal first.
+  // The most efficient way to traverse to some location will be a sequence of
+  // the same horizontal button  press and the same vertical button presses. The
+  // only thing that needs to be determined is weather this leads to a panic
+  // intermediate position and weather we should move vertically first or
+  // horizontally.
   size_t length_horizontal_first = 0;
   if (Pos{r, c + d_c} != panic_pos) {
-    Pos pos = KEYPAD_POS_MAP.at('A');
+    Pos pos = ARROW_PAD_POS_MAP.at('A');
     length_horizontal_first += move_horizontally(pos, d_c, depth, memo);
     length_horizontal_first += move_vertically(pos, d_r, depth, memo);
     length_horizontal_first += press_button(pos, depth, memo);
@@ -146,7 +150,7 @@ size_t request_movement_and_press(const int &r, const int &c, const int &d_r,
   }
   size_t length_vertical_first = 0;
   if (Pos{r + d_r, c} != panic_pos) {
-    Pos pos = KEYPAD_POS_MAP.at('A');
+    Pos pos = ARROW_PAD_POS_MAP.at('A');
     length_vertical_first += move_vertically(pos, d_r, depth, memo);
     length_vertical_first += move_horizontally(pos, d_c, depth, memo);
     length_vertical_first += press_button(pos, depth, memo);
@@ -165,9 +169,9 @@ size_t get_code_complexity(const std::string &code,
   size_t code_value = std::stoi(code.substr(0, code.size() - 1));
 
   size_t code_length = 0;
-  Pos pos = NUMPAD_POS_MAP.at('A');
+  Pos pos = NUM_PAD_POS_MAP.at('A');
   for (const auto &next_symbol : code) {
-    Pos next_pos = NUMPAD_POS_MAP.at(next_symbol);
+    Pos next_pos = NUM_PAD_POS_MAP.at(next_symbol);
     code_length +=
         request_movement_and_press(pos[0], pos[1], next_pos[0] - pos[0],
                                    next_pos[1] - pos[1], DEPTH, memo);
@@ -182,6 +186,7 @@ int main() {
   size_t complexity = 0;
 
   std::vector<std::string> codes = get_codes();
+
   std::unordered_map<MemoKey, size_t> memo = {};
   for (const auto &code : codes) {
     complexity += get_code_complexity(code, memo);
