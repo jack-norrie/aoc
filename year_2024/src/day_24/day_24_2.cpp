@@ -1,4 +1,7 @@
+#include <algorithm>
+#include <bitset>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <regex>
 #include <stdexcept>
@@ -84,6 +87,21 @@ get_dependency_graph(std::ifstream &input_file) {
   return dependency_graph;
 }
 
+size_t get_num_bits(
+    const std::unordered_map<std::string,
+                             std::tuple<std::string, std::string, std::string>>
+        &dependency_graph) {
+  size_t num_bits = 0;
+  for (const auto &it : dependency_graph) {
+    auto wire = it.first;
+    if (wire[0] == 'z') {
+      size_t wire_num = std::stoi(wire.substr(1, wire.size() - 1));
+      num_bits = std::max(num_bits, wire_num);
+    }
+  }
+  return num_bits;
+}
+
 long add_numbers(
     const std::unordered_map<std::string,
                              std::tuple<std::string, std::string, std::string>>
@@ -125,6 +143,98 @@ long add_numbers(
   return res;
 }
 
+void test_one_hot_x(
+    const std::unordered_map<std::string,
+                             std::tuple<std::string, std::string, std::string>>
+        &dependency_graph,
+    const size_t &b, const size_t &num_bits) {
+  std::vector<bool> x(num_bits - 1, false);
+  std::vector<bool> y(num_bits - 1, false);
+  x[b] = true;
+
+  auto actual = add_numbers(dependency_graph, x, y);
+  size_t expected = 1L << b;
+  if (actual != expected) {
+    std::cout << "One hot x: " << std::endl;
+    std::cout << std::setw(10) << "X: " << std::bitset<64>(1L << b)
+              << std::endl;
+    std::cout << std::setw(10) << "Y: " << std::bitset<64>(0) << std::endl;
+    std::cout << std::setw(10) << "Actual: " << std::bitset<64>(actual)
+              << std::endl;
+    std::cout << std::setw(10) << "Expected: " << std::bitset<64>(expected)
+              << std::endl;
+  }
+}
+
+void test_one_hot_y(
+    const std::unordered_map<std::string,
+                             std::tuple<std::string, std::string, std::string>>
+        &dependency_graph,
+    const size_t &b, const size_t &num_bits) {
+  std::vector<bool> x(num_bits - 1, false);
+  std::vector<bool> y(num_bits - 1, false);
+  y[b] = true;
+
+  auto actual = add_numbers(dependency_graph, x, y);
+  size_t expected = 1L << b;
+  if (actual != expected) {
+    std::cout << "One hot y: " << std::endl;
+    std::cout << std::setw(10) << "X: " << std::bitset<64>(0) << std::endl;
+    std::cout << std::setw(10) << "Y: " << std::bitset<64>(1L << b)
+              << std::endl;
+    std::cout << std::setw(10) << "Actual: " << std::bitset<64>(actual)
+              << std::endl;
+    std::cout << std::setw(10) << "Expected: " << std::bitset<64>(expected)
+              << std::endl;
+  }
+}
+
+void test_one_hot_xy(
+    const std::unordered_map<std::string,
+                             std::tuple<std::string, std::string, std::string>>
+        &dependency_graph,
+    const size_t &b, const size_t &num_bits) {
+  std::vector<bool> x(num_bits - 1, false);
+  std::vector<bool> y(num_bits - 1, false);
+  x[b] = true;
+  y[b] = true;
+
+  auto actual = add_numbers(dependency_graph, x, y);
+  size_t expected = 1L << (b + 1);
+  if (actual != expected) {
+    std::cout << "One hot x and y: " << std::endl;
+    std::cout << std::setw(10) << "X: " << std::bitset<64>(1L << b)
+              << std::endl;
+    std::cout << std::setw(10) << "Y: " << std::bitset<64>(1L << b)
+              << std::endl;
+    std::cout << std::setw(10) << "Actual: " << std::bitset<64>(actual)
+              << std::endl;
+    std::cout << std::setw(10) << "Expected: " << std::bitset<64>(expected)
+              << std::endl;
+  }
+}
+
+void probe_gates(const std::unordered_map<
+                 std::string, std::tuple<std::string, std::string, std::string>>
+                     &dependency_graph) {
+  size_t num_bits = get_num_bits(dependency_graph);
+
+  for (size_t b = 0; b < num_bits; b++) {
+    std::cout << "Gate: " << b << std::endl;
+    test_one_hot_x(dependency_graph, b, num_bits);
+    test_one_hot_y(dependency_graph, b, num_bits);
+    test_one_hot_xy(dependency_graph, b, num_bits);
+  }
+}
+
+void perform_swap(
+    std::unordered_map<std::string,
+                       std::tuple<std::string, std::string, std::string>>
+        &dependency_graph,
+    const std::string &u, const std::string &v) {
+  std::swap(dependency_graph.at(u), dependency_graph.at(v));
+}
+
 int main() {
   std::ifstream input_file("data/day_24/input");
   if (!input_file.is_open()) {
@@ -137,9 +247,26 @@ int main() {
 
   auto dependency_graph = get_dependency_graph(input_file);
 
-  auto res = add_numbers(dependency_graph, x, y);
+  // Manually spot swaps until the gate probing returns no errors.
+  std::vector<std::pair<std::string, std::string>> swaps = {
+      {"kfp", "hbs"}, {"pdg", "z22"}, {"dhq", "z18"}, {"jcp", "z27"}};
+  std::vector<std::string> swapped_gates = {};
+  for (const auto &swap : swaps) {
+    perform_swap(dependency_graph, swap.first, swap.second);
+    swapped_gates.push_back(swap.first);
+    swapped_gates.push_back(swap.second);
+  }
 
-  std::cout << res << std::endl;
+  probe_gates(dependency_graph);
+
+  std::sort(swapped_gates.begin(), swapped_gates.end());
+  for (size_t i = 0; i < swapped_gates.size(); i++) {
+    std::cout << swapped_gates[i];
+    if (i < swapped_gates.size() - 1) {
+      std::cout << ',';
+    }
+  }
+  std::cout << std::endl;
 
   return 0;
 }
