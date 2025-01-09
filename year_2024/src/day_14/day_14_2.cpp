@@ -3,6 +3,7 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <regex>
 #include <stdexcept>
 #include <string>
@@ -144,12 +145,8 @@ void draw_board(const std::vector<std::array<int, 2>> positions) {
   std::cout << std::endl;
 }
 
-int main() {
-  std::tuple<std::vector<std::array<int, 2>>, std::vector<std::array<int, 2>>>
-      particle_tuple = get_positions_and_velocicities();
-  std::vector<std::array<int, 2>> positions = std::get<0>(particle_tuple);
-  std::vector<std::array<int, 2>> velocities = std::get<1>(particle_tuple);
-
+void plot_low_entropy_progressions(std::vector<std::array<int, 2>> positions,
+                                   std::vector<std::array<int, 2>> velocities) {
   // Sample the entropies of the first num_samples evolutions.
   // Then get the 0.1% quantile.
   const std::size_t num_samples = 10000;
@@ -177,6 +174,39 @@ int main() {
                 << std::endl;
     }
   }
+}
 
+size_t find_min_entropy(std::vector<std::array<int, 2>> positions,
+                        std::vector<std::array<int, 2>> velocities,
+                        const size_t &n) {
+  size_t min_entropy = std::numeric_limits<size_t>::max();
+  size_t min_t = 0;
+  for (size_t i = 1; i < n; i++) {
+    progress_time(positions, velocities, 1);
+
+    size_t entropy_eval = entropy(positions);
+    if (entropy_eval < min_entropy) {
+      min_entropy = entropy_eval;
+      min_t = i;
+    }
+  }
+  return min_t;
+}
+
+int main() {
+  std::tuple<std::vector<std::array<int, 2>>, std::vector<std::array<int, 2>>>
+      particle_tuple = get_positions_and_velocicities();
+  std::vector<std::array<int, 2>> positions = std::get<0>(particle_tuple);
+  std::vector<std::array<int, 2>> velocities = std::get<1>(particle_tuple);
+
+  // Assuming the christmas tree occurs in the first million iterations,
+  // then the following will return the lowest entropy state which should
+  // coreespond to this "ordered" low entropy christmas tree.
+  size_t min_t = find_min_entropy(positions, velocities, 1 << 20);
+
+  progress_time(positions, velocities, min_t);
+  draw_board(positions);
+
+  std::cout << min_t << std::endl;
   return 0;
 }
