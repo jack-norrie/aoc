@@ -1,13 +1,10 @@
-#include <algorithm>
 #include <array>
-#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <limits>
 #include <regex>
 #include <stdexcept>
 #include <string>
-#include <thread>
 #include <tuple>
 #include <vector>
 
@@ -143,37 +140,6 @@ void draw_board(const std::vector<std::array<int, 2>> positions) {
     std::cout << '#';
   }
   std::cout << std::endl;
-}
-
-void plot_low_entropy_progressions(std::vector<std::array<int, 2>> positions,
-                                   std::vector<std::array<int, 2>> velocities) {
-  // Sample the entropies of the first num_samples evolutions.
-  // Then get the 0.1% quantile.
-  const std::size_t num_samples = 10000;
-  std::array<size_t, num_samples> entropy_samples = {};
-  std::vector<std::array<int, 2>> positions_copy = positions;
-  for (size_t i = 0; i < num_samples; i++) {
-    progress_time(positions_copy, velocities, 1);
-    entropy_samples[i] = entropy(positions_copy);
-  }
-  std::sort(entropy_samples.begin(), entropy_samples.end());
-  size_t low_entropy = entropy_samples[num_samples / 1000];
-
-  size_t t = 0;
-  while (true) {
-    progress_time(positions, velocities, 1);
-    ++t;
-
-    // The christmas tree is an ordered structure, it will have a low entropy.
-    // To speed up our search only draw low entropy boards.
-    size_t entropy_eval = entropy(positions);
-    if (entropy_eval < low_entropy) {
-      draw_board(positions);
-      std::this_thread::sleep_for(std::chrono::seconds(1));
-      std::cout << "The timestamp for the above board state is: " << t
-                << std::endl;
-    }
-  }
 }
 
 size_t find_min_entropy(std::vector<std::array<int, 2>> positions,
