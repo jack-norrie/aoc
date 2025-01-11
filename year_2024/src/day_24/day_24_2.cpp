@@ -89,11 +89,11 @@ bool validate_input_xor(
         &dependency_graph,
     const std::string &wire, const int &i,
     std::unordered_set<std::string> &validated_wires,
-    std::unordered_set<std::string> &seen_wires) {
+    std::unordered_set<std::string> &new_wires) {
   if (validated_wires.contains(wire)) {
     return true;
   } else {
-    seen_wires.insert(wire);
+    new_wires.insert(wire);
   }
 
   if (!dependency_graph.contains(wire)) {
@@ -119,11 +119,11 @@ bool validate_input_and(
         &dependency_graph,
     const std::string &wire, const int &i,
     std::unordered_set<std::string> &validated_wires,
-    std::unordered_set<std::string> &seen_wires) {
+    std::unordered_set<std::string> &new_wires) {
   if (validated_wires.contains(wire)) {
     return true;
   } else {
-    seen_wires.insert(wire);
+    new_wires.insert(wire);
   }
 
   if (!dependency_graph.contains(wire)) {
@@ -150,7 +150,7 @@ bool validate_carry(
         &dependency_graph,
     const std::string &wire, const int &i,
     std::unordered_set<std::string> &validated_wires,
-    std::unordered_set<std::string> &seen_wires);
+    std::unordered_set<std::string> &new_wires);
 
 bool validate_intermediate_and(
     const std::unordered_map<std::string,
@@ -158,11 +158,11 @@ bool validate_intermediate_and(
         &dependency_graph,
     const std::string &wire, const int &i,
     std::unordered_set<std::string> &validated_wires,
-    std::unordered_set<std::string> &seen_wires) {
+    std::unordered_set<std::string> &new_wires) {
   if (validated_wires.contains(wire)) {
     return true;
   } else {
-    seen_wires.insert(wire);
+    new_wires.insert(wire);
   }
 
   if (!dependency_graph.contains(wire)) {
@@ -174,13 +174,13 @@ bool validate_intermediate_and(
     return false;
   }
   bool valid_option_1 = validate_input_xor(dependency_graph, operand_1, i,
-                                           validated_wires, seen_wires) &&
+                                           validated_wires, new_wires) &&
                         validate_carry(dependency_graph, operand_2, i - 1,
-                                       validated_wires, seen_wires);
+                                       validated_wires, new_wires);
   bool valid_option_2 = validate_input_xor(dependency_graph, operand_2, i,
-                                           validated_wires, seen_wires) &&
+                                           validated_wires, new_wires) &&
                         validate_carry(dependency_graph, operand_1, i - 1,
-                                       validated_wires, seen_wires);
+                                       validated_wires, new_wires);
   return (valid_option_1 || valid_option_2);
 }
 
@@ -190,18 +190,18 @@ bool validate_carry(
         &dependency_graph,
     const std::string &wire, const int &i,
     std::unordered_set<std::string> &validated_wires,
-    std::unordered_set<std::string> &seen_wires) {
+    std::unordered_set<std::string> &new_wires) {
   if (validated_wires.contains(wire)) {
     return true;
   } else {
-    seen_wires.insert(wire);
+    new_wires.insert(wire);
   }
 
   // Base case i == 0: in which case we have a half-adder and our
   // wire should be equal to the first and input gate.
   if (i == 0) {
     return validate_input_and(dependency_graph, wire, i, validated_wires,
-                              seen_wires);
+                              new_wires);
   }
 
   if (!dependency_graph.contains(wire)) {
@@ -215,14 +215,14 @@ bool validate_carry(
   }
   bool valid_option_1 =
       validate_input_and(dependency_graph, operand_1, i, validated_wires,
-                         seen_wires) &&
+                         new_wires) &&
       validate_intermediate_and(dependency_graph, operand_2, i, validated_wires,
-                                seen_wires);
+                                new_wires);
   bool valid_option_2 =
       validate_input_and(dependency_graph, operand_2, i, validated_wires,
-                         seen_wires) &&
+                         new_wires) &&
       validate_intermediate_and(dependency_graph, operand_1, i, validated_wires,
-                                seen_wires);
+                                new_wires);
   return (valid_option_1 || valid_option_2);
 }
 
@@ -231,20 +231,20 @@ bool validate_output_wire(
                              std::tuple<std::string, std::string, std::string>>
         &dependency_graph,
     const int &i, std::unordered_set<std::string> &validated_wires,
-    std::unordered_set<std::string> &seen_wires) {
+    std::unordered_set<std::string> &new_wires) {
 
   std::string wire = get_wire_name("z", i);
   if (validated_wires.contains(wire)) {
     return true;
   } else {
-    seen_wires.insert(wire);
+    new_wires.insert(wire);
   }
 
   // Base case i == 0: in which case we have a half-adder and our
   // wire should be equal to the first xor input gate.
   if (i == 0) {
     return validate_input_xor(dependency_graph, wire, i, validated_wires,
-                              seen_wires);
+                              new_wires);
   }
 
   if (!dependency_graph.contains(wire)) {
@@ -257,13 +257,13 @@ bool validate_output_wire(
     return false;
   }
   bool valid_option_1 = validate_input_xor(dependency_graph, operand_1, i,
-                                           validated_wires, seen_wires) &&
+                                           validated_wires, new_wires) &&
                         validate_carry(dependency_graph, operand_2, i - 1,
-                                       validated_wires, seen_wires);
+                                       validated_wires, new_wires);
   bool valid_option_2 = validate_input_xor(dependency_graph, operand_2, i,
-                                           validated_wires, seen_wires) &&
+                                           validated_wires, new_wires) &&
                         validate_carry(dependency_graph, operand_1, i - 1,
-                                       validated_wires, seen_wires);
+                                       validated_wires, new_wires);
   return (valid_option_1 || valid_option_2);
 }
 
@@ -284,7 +284,8 @@ std::vector<std::string> correct_circuit(
         &dependency_graph) {
   // This approach is O(kn^2)
   // - n: Number of bits in the adder.
-  // - k: Number of wire wires swapped.
+  // - k: Number of wire wires swapped.dependency_graph
+
   std::vector<std::string> swapped_gates = {};
 
   size_t b = get_num_bits(dependency_graph);
@@ -295,38 +296,40 @@ std::vector<std::string> correct_circuit(
   }
 
   std::unordered_set<std::string> validated_wires = {};
-  // First if block is O(n) and is entered n-k times, meanwhile second block is
-  // O(n) and is enetered k times over the course of this loop. This leading to
-  // an overall time complexity of O((n-k)n + kn^2) = O(kn^2)
-  for (size_t i = 0; i < b; i++) {
-    // O(n)
-    std::unordered_set<std::string> seen_wires = validated_wires;
 
+  // First conditional block is O(1) and is entered n-k times, meanwhile second
+  // block is O(n) and is enetered k times over the course of this loop. This
+  // leading to an overall time complexity of O((n-k)(1) + (k)(n)) = O(kn)
+  for (size_t i = 0; i < b; i++) {
     // O(1) - Each iteration evaluates a fixed size full adder, i.e. previously
     // validated are not recomputed.
-    if (validate_output_wire(dependency_graph, i, validated_wires,
-                             seen_wires)) {
-      validated_wires = seen_wires;
+    std::unordered_set<std::string> new_wires = {};
+    if (validate_output_wire(dependency_graph, i, validated_wires, new_wires)) {
+      // O(1) - Full-adder has constant size.
+      for (const auto &wire : new_wires) {
+        validated_wires.insert(wire);
+      }
     } else {
       // Both of these set difference operations are O(n), but the size of the
       // resulting sets are:
       // O(1) - Size of full adder is fixed.
-      auto bad_set_1 = set_difference(seen_wires, validated_wires);
-      // O(n) _ size of remaining unvalidated circuit is linear.
+      auto bad_set_1 = set_difference(new_wires, validated_wires);
+      // O(n) - size of remaining unvalidated circuit is linear.
       auto bad_set_2 = set_difference(wire_set, validated_wires);
 
       bool valid = false;
-      // O(1 * n * n) = O(n^2)
+      // O(1 * n * 1) = O(n)
       for (auto const &wire_1 : bad_set_1) {
         for (auto const &wire_2 : bad_set_2) {
           if (wire_1 != wire_2) {
-            // O(n)
-            std::unordered_set<std::string> seen_wires = validated_wires;
+            std::unordered_set<std::string> new_wires = {};
             perform_swap(dependency_graph, wire_1, wire_2);
             if (validate_output_wire(dependency_graph, i, validated_wires,
-                                     seen_wires)) {
+                                     new_wires)) {
               valid = true;
-              validated_wires = seen_wires;
+              for (const auto &wire : new_wires) {
+                validated_wires.insert(wire);
+              }
               swapped_gates.push_back(wire_1);
               swapped_gates.push_back(wire_2);
               break;
