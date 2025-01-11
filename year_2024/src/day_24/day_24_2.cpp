@@ -282,7 +282,9 @@ std::vector<std::string> correct_circuit(
     std::unordered_map<std::string,
                        std::tuple<std::string, std::string, std::string>>
         &dependency_graph) {
-  // This approach is O(n^2) - where n is the number of bits in the adder.
+  // This approach is O(kn^2)
+  // - n: Number of bits in the adder.
+  // - k: Number of wire wires swapped.
   std::vector<std::string> swapped_gates = {};
 
   size_t b = get_num_bits(dependency_graph);
@@ -293,26 +295,32 @@ std::vector<std::string> correct_circuit(
   }
 
   std::unordered_set<std::string> validated_wires = {};
-  // O(n)
+  // First if block is O(n) and is entered n-k times, meanwhile second block is
+  // O(n) and is enetered k times over the course of this loop. This leading to
+  // an overall time complexity of O((n-k)n + kn^2) = O(kn^2)
   for (size_t i = 0; i < b; i++) {
+    // O(n)
     std::unordered_set<std::string> seen_wires = validated_wires;
 
-    // O(1) - Each iteration evaluates a fixed size full adder.
+    // O(1) - Each iteration evaluates a fixed size full adder, i.e. previously
+    // validated are not recomputed.
     if (validate_output_wire(dependency_graph, i, validated_wires,
                              seen_wires)) {
       validated_wires = seen_wires;
     } else {
+      // Both of these set difference operations are O(n), but the size of the
+      // resulting sets are:
       // O(1) - Size of full adder is fixed.
       auto bad_set_1 = set_difference(seen_wires, validated_wires);
-      //
       // O(n) _ size of remaining unvalidated circuit is linear.
       auto bad_set_2 = set_difference(wire_set, validated_wires);
 
       bool valid = false;
-      // O(1 * n * 1) = O(n)
+      // O(1 * n * n) = O(n^2)
       for (auto const &wire_1 : bad_set_1) {
         for (auto const &wire_2 : bad_set_2) {
           if (wire_1 != wire_2) {
+            // O(n)
             std::unordered_set<std::string> seen_wires = validated_wires;
             perform_swap(dependency_graph, wire_1, wire_2);
             if (validate_output_wire(dependency_graph, i, validated_wires,
