@@ -6,6 +6,7 @@
 
 # Un-ignore files with extensions that we want to track
 !*.cpp
+!*.c
 !*.h
 !*.py
 !*.txt
