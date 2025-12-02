@@ -23,3 +23,5 @@
 *.out
 data/**
 **/compile_flags.txt
+
+**/scratch/**

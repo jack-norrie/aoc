@@ -6,4 +6,23 @@ This follows my AOC journey last year with C++, which I originally picked so tha
 
 My main resource for learning the syntax of the language will be The C Programming Language. I have heard the exercises for this book are excellent, and as such I will be doing them all over the course of this month. However, one downside of this book is that it is very terse, as such I will supplement it with C Programming: A Modern Approach when I require more exposition.
 
-## Lessons Learned
+## Problems
+
+### Day 1
+
+#### Description
+
+The setup for this problem is that you occupy some position on a ring with 100 spaces. At each iteration you can either move left or right by some amount. The first part of the problem has you count the number of times you land on zero throughout the traversal as your final square, while the last part has you count how many times you land on zero throughout any part of the traversal.
+
+#### Solution
+
+To solve the first part you need to write logic to open a file and iterate over its lines. You then need to use the information on each line to update your position. This requires usage of modular arithmetic. Unfortunately, C does not implement mathematical modulo, instead it rounds to zero, i.e. the modulo operation finds `r` such that `x = round_to_zero(x / m) * m + r`, while mathematical modulo finds `r` for `x = floor(x / m) * m + r`. To overcome this problem you can use the pattern `((x % m) + m) % m`. This is a no-op if `x` is positive, but if `x` is negative then this has the effect of undoing the off by one error on the quotient. Finally, you increment your result whenever you land on a zero.
+
+The next part of the problem can be solved by dividing the raw position update, pre modulo, by the modulo, since this will give an indication of how many times zero was passed in the traversal. However, yet again we must be mindful of the rounding towards zero. For example, a naive handling of this, would cause `50 -> -1` to not be counted as a zero passing. We notice that additional crossings past the original positive to negative crossing does get counted, e.g. from `50 -> -101` will miss 1 -> 0 but will include -99 -> 100, so we need to consider the edge case of the first positive to negative crossing. As such we add a `+1` increment check for the condition `new_pos <= 0 && pos > 0`. We then apply the same logic for all paths `res += abs(new_pos / m)`.
+
+#### Lessons
+
+- How to open a file
+- How to slice a string
+- How to cast between types
+- Division rounds towards zero
