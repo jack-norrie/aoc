@@ -26,3 +26,37 @@ The next part of the problem can be solved by dividing the raw position update, 
 - How to slice a string
 - How to cast between types
 - Division rounds towards zero
+
+## Day 2
+
+#### Description
+
+The challenge posed by this problem was detecting if a string was composed on k copies of a substring.
+
+#### Solution
+
+The function I can up with to check this was to simply check every length `m` segment against the first length `m` segment. Since equality is an equivalence relation, this would then suffice to ensure that all the substrings were equal, i.e. the whole string was a tiling of repeated substrings.
+
+```C
+int is_k_copies(const char *s, int k) {
+  int n = strlen(s);
+  int m = n / k;
+
+  int i;
+  for (i = 0; i < strlen(s); i++) {
+    if (s[i] != s[i % m]) {
+      return 0;
+    }
+  }
+  return 1;
+}
+
+```
+
+#### Lessons
+
+- How to split on a delimiter using strtok
+- By understanding `strtok` I found how C handles internal state with `static` variables. This then lead me to learn about reentrant functions, specifically `strtok_r` which allowed me to perform nested tokenisation.
+- `strcspan` (string compliment span) returns a pointer to the first occurrence of some target character, this can be used to remove newline characters.
+- You cannot return an array.
+- You can use structs to return multiple outputs for a function
