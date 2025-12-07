@@ -33,7 +33,6 @@ int main() {
       idx = find_max(line, idx + 1, strlen(line) - i);
       long num = line[idx] - '0';
       printf("%d\t%ld\n", idx, num);
-      // printf("%f\n", pow(10, i));
       jolts += num * (long)pow(10, i);
     }
     printf("%ld\n", jolts);

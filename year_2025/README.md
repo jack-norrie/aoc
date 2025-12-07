@@ -60,3 +60,19 @@ int is_k_copies(const char *s, int k) {
 - `strcspan` (string compliment span) returns a pointer to the first occurrence of some target character, this can be used to remove newline characters.
 - You cannot return an array.
 - You can use structs to return multiple outputs for a function
+
+## Day 3
+
+#### Description
+
+#### Solution
+
+#### Lessons
+
+## Day N
+
+#### Description
+
+#### Solution
+
+#### Lessons
