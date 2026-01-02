@@ -54,12 +54,16 @@ def find_minimum_clicks_for_target_state(
             dist += 1
             for button in buttons:
                 new_state_list = list(cur_state)
+
+                valid = True
                 for i in range(n_lights):
                     if button & (1 << i):
                         new_state_list[i] -= 1
-                new_state = tuple(new_state_list)
+                        if new_state_list[i] < 0:
+                            valid = False
+                            break
 
-                if new_state not in seen:
+                if valid and (new_state := tuple(new_state_list)) not in seen:
                     heapq.heappush(q, (dist + max(new_state), dist, new_state))
                     seen.add(new_state)
 
