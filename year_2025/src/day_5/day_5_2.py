@@ -6,23 +6,21 @@ def process_line(line: str) -> int:
     return 0
 
 
-def find_number_of_valid_ids(ids: list[int], intervals: list[tuple[int, int]]) -> int:
-    ids = sorted(ids)
+def get_combined_intervals_span(intervals: list[tuple[int, int]]) -> int:
     intervals = sorted(intervals)
 
-    n = len(intervals)
-    j = 0
+    combined_intervals = []
 
-    res = 0
-    for id in ids:
-        while j < n - 1 and id > intervals[j][1]:
-            j += 1
-
-        if id >= intervals[j][0] and id <= intervals[j][1]:
-            res += 1
-            logging.debug(f"{id} - fresh")
+    cur = list(intervals[0])
+    for interval in intervals[1:]:
+        if interval[0] <= cur[1]:
+            cur[1] = max(cur[1], interval[1])
         else:
-            logging.debug(f"{id} - spoiled")
+            combined_intervals.append(cur)
+            cur = list(interval)
+    combined_intervals.append(cur)
+
+    res = sum(u - l + 1 for l, u in combined_intervals)
 
     return res
 
@@ -42,7 +40,7 @@ def main():
 
         logging.debug(f"{intervals}, {ids}")
 
-        res = find_number_of_valid_ids(ids, intervals)
+        res = get_combined_intervals_span(intervals)
         logging.info(res)
 
 
