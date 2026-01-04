@@ -25,3 +25,4 @@ data/**
 **/compile_flags.txt
 
 **/scratch/**
+.venv
