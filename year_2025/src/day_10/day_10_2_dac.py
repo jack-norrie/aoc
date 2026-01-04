@@ -5,7 +5,7 @@ import logging
 from functools import lru_cache
 
 
-def parse_line(line: str) -> tuple[list[int], int, list[int]]:
+def parse_line(line: str) -> tuple[tuple[int, ...], int, tuple[int, ...]]:
     pattern = re.compile(r"\[(.*)\] (.*) \{(.*)\}")
 
     matching = pattern.match(line)
@@ -22,19 +22,21 @@ def parse_line(line: str) -> tuple[list[int], int, list[int]]:
         for button_idx in button_idx_set:
             button |= 1 << int(button_idx)
         buttons.append(button)
+    buttons = tuple(buttons)
 
     target_state = 0
     for i, c in enumerate(light):
         if c == "#":
             target_state |= 1 << i
 
-    target_counts = [int(x) for x in jolt.split(",")]
+    target_counts = tuple([int(x) for x in jolt.split(",")])
 
     return buttons, target_state, target_counts
 
 
+@lru_cache(None)
 def find_all_button_clicks_and_combos_for_target_state(
-    buttons: list[int], target_state: int
+    buttons: tuple[int], target_state: int
 ) -> list:
     res = []
 
@@ -62,14 +64,16 @@ def find_all_button_clicks_and_combos_for_target_state(
 
 
 def find_minimum_number_of_button_presses_for_target_counts(
-    buttons, target_counts
+    buttons: tuple[int, ...], target_counts: tuple[int, ...]
 ) -> int:
     n_lights = len(target_counts)
     n_buttons = len(buttons)
 
+    zero_vector = (0,) * n_lights
+
     @lru_cache(None)
-    def rec(target_counts) -> int:
-        if sum(target_counts) == 0:
+    def rec(target_counts: tuple[int, ...]) -> int:
+        if target_counts == zero_vector:
             return 0
 
         target_state = 0
@@ -101,7 +105,7 @@ def find_minimum_number_of_button_presses_for_target_counts(
 
         return res
 
-    return rec(tuple(target_counts))
+    return rec(target_counts)
 
 
 def compute_line(line: str) -> int:

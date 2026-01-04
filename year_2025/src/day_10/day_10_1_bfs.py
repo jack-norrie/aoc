@@ -35,6 +35,7 @@ def find_minimum_clicks_for_target_state(buttons: list[int], target_state: int) 
     n_buttons = len(buttons)
 
     q = deque([0])
+    seen = set()
 
     clicks = 0
     while q:
@@ -45,8 +46,10 @@ def find_minimum_clicks_for_target_state(buttons: list[int], target_state: int) 
                 return clicks
 
             for i in range(n_buttons):
-                button = buttons[i]
-                q.append(cur_state ^ button)
+                next_state = cur_state ^ buttons[i]
+                if next_state not in seen:
+                    q.append(next_state)
+                    seen.add(next_state)
 
         clicks += 1
 

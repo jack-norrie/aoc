@@ -46,7 +46,7 @@ def find_minimum_clicks_for_target_state(
     clicks = 0
     while q:
         for _ in range(len(q)):
-            heuristic, dist, cur_state = heapq.heappop(q)
+            _, dist, cur_state = heapq.heappop(q)
 
             if cur_state == zero_state:
                 return dist
